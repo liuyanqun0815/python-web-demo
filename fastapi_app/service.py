@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, datetime
+import logging
 
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import User, UserMessage
+
+logger = logging.getLogger(__name__)
 
 
 class UserNotFoundError(Exception):
@@ -54,7 +57,8 @@ async def process_user_message(session: AsyncSession, user_id: int, message: str
         )
     except SQLAlchemyError as exc:
         await session.rollback()
-        raise RuntimeError("database error") from exc
+        logger.exception("Database operation failed in process_user_message")
+        raise RuntimeError(f"{exc.__class__.__name__}: {exc}") from exc
 
 
 async def _get_user(session: AsyncSession, user_id: int) -> User | None:

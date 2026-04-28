@@ -3,7 +3,7 @@ import os
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 database_url = os.getenv(
-    "DATABASE_URL", "postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/postgres"
+    "DATABASE_URL", "postgresql+asyncpg://postgres:difyai123456@192.168.6.170:5432/test"
 )
 
 engine = create_async_engine(database_url, pool_pre_ping=True, future=True)
