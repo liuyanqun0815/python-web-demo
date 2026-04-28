@@ -39,4 +39,11 @@ def process_endpoint():
 
 
 if __name__ == "__main__":
-    app.run(host=Settings.host, port=Settings.port, debug=Settings.debug)
+    # threaded 与 processes 不能同时启用；这里固定多进程模式用于并发压测
+    app.run(
+        host=Settings.host,
+        port=Settings.port,
+        debug=Settings.debug,
+        threaded=False,
+        processes=Settings.flask_processes,
+    )

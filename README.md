@@ -81,7 +81,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 export DATABASE_URL=postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/postgres
-python app.py
+gunicorn -w 4 -k sync -b 0.0.0.0:5000 app:app
 ```
 
 默认端口：`5000`
@@ -94,7 +94,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 export DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/postgres
-uvicorn main:app --host 0.0.0.0 --port 8000 --workers 1
+gunicorn -w 4 --threads 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 main:app
 ```
 
 默认端口：`8000`
@@ -107,7 +107,7 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 set DATABASE_URL=postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/postgres
-python app.py
+gunicorn -w 4 -k sync -b 0.0.0.0:5000 app:app
 ```
 
 ```bash
@@ -116,7 +116,7 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 set DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/postgres
-python main.py
+gunicorn -w 4 --threads 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 main:app
 ```
 
 ## Linux 使用 systemd 托管（推荐）
@@ -135,7 +135,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=/opt/python_web_test/flask_app
 Environment=DATABASE_URL=postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/postgres
-ExecStart=/opt/python_web_test/flask_app/.venv/bin/python app.py
+ExecStart=/opt/python_web_test/flask_app/.venv/bin/gunicorn -w 4 -k sync -b 0.0.0.0:5000 app:app
 Restart=always
 RestartSec=3
 
@@ -155,7 +155,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=/opt/python_web_test/fastapi_app
 Environment=DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/postgres
-ExecStart=/opt/python_web_test/fastapi_app/.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 --workers 1
+ExecStart=/opt/python_web_test/fastapi_app/.venv/bin/gunicorn -w 4 --threads 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 main:app
 Restart=always
 RestartSec=3
 
@@ -180,7 +180,7 @@ sudo journalctl -u fastapi-app -f
 ```
 
 常见错误修复建议：
-- `ExecStart` 路径错误：确认虚拟环境存在且路径正确（`.venv/bin/python`、`.venv/bin/uvicorn`）。
+- `ExecStart` 路径错误：确认虚拟环境存在且路径正确（`.venv/bin/gunicorn`）。
 - `Permission denied`：检查 `User/Group` 是否有项目目录读写权限。
 - 端口无法访问：检查服务器防火墙与安全组放行 `5000/8000` 端口。
 

@@ -8,3 +8,4 @@ class Settings:
     host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", "5000"))
     debug = os.getenv("DEBUG", "false").lower() == "true"
+    flask_processes = int(os.getenv("FLASK_PROCESSES", "4"))
