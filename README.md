@@ -81,7 +81,9 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 export DATABASE_URL=postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/postgres
-gunicorn -w 4 -k sync -b 0.0.0.0:5000 app:app
+mkdir -p logs
+nohup gunicorn -w 4 -k sync -b 0.0.0.0:5000 app:app > logs/flask-gunicorn.out 2>&1 &
+echo $! > logs/flask-gunicorn.pid
 ```
 
 默认端口：`5000`
@@ -94,10 +96,21 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 export DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/postgres
-gunicorn -w 4 --threads 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 main:app
+mkdir -p logs
+nohup gunicorn -w 4 --threads 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 main:app > logs/fastapi-gunicorn.out 2>&1 &
+echo $! > logs/fastapi-gunicorn.pid
 ```
 
 默认端口：`8000`
+
+查看日志与进程：
+
+```bash
+tail -f flask_app/logs/flask-gunicorn.out
+tail -f fastapi_app/logs/fastapi-gunicorn.out
+cat flask_app/logs/flask-gunicorn.pid
+cat fastapi_app/logs/fastapi-gunicorn.pid
+```
 
 ## 在 Windows 运行（参考）
 
