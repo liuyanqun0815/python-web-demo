@@ -11,7 +11,7 @@ GUNICORN_BIN="${APP_DIR}/.venv/bin/gunicorn"
 WORKERS="${FASTAPI_WORKERS:-4}"
 THREADS="${FASTAPI_THREADS:-4}"
 BIND_HOST="${FASTAPI_HOST:-0.0.0.0}"
-BIND_PORT="${FASTAPI_PORT:-8000}"
+BIND_PORT="${FASTAPI_PORT:-8001}"
 
 start_service() {
     mkdir -p "${LOG_DIR}"
