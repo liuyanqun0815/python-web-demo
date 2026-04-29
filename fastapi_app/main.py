@@ -14,6 +14,7 @@ from service import ServiceValidationError, UserNotFoundError, process_user_mess
 app = FastAPI()
 debug_api_errors = os.getenv("DEBUG_API_ERRORS", "false").lower() == "true"
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s - %(message)s")
 
 
 def cpu_burn(iterations: int) -> int:
@@ -44,6 +45,7 @@ async def request_validation_exception_handler(request, exc):  # noqa: ANN001
 
 @app.post("/api/user-message/process", response_model=ApiResponse)
 async def process_endpoint(payload: ProcessRequest, session: AsyncSession = Depends(get_session)):
+    logger.info("Request /api/user-message/process payload=%s", payload.model_dump())
     try:
         result = await process_user_message(
             session=session,
@@ -78,6 +80,7 @@ async def process_endpoint(payload: ProcessRequest, session: AsyncSession = Depe
 
 @app.post("/api/cpu-burn", response_model=CpuBurnResponse)
 async def cpu_burn_endpoint(payload: CpuBurnRequest):
+    logger.info("Request /api/cpu-burn payload=%s", payload.model_dump())
     start = time.perf_counter()
     checksum = cpu_burn(payload.iterations)
     elapsed_ms = int((time.perf_counter() - start) * 1000)

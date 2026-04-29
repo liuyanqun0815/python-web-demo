@@ -1,4 +1,5 @@
 import time
+import logging
 
 from flask import Flask, jsonify, request
 
@@ -6,6 +7,8 @@ from config import Settings
 from service import ServiceValidationError, UserNotFoundError, process_user_message
 
 app = Flask(__name__)
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s - %(message)s")
 
 
 def cpu_burn(iterations: int) -> int:
@@ -29,6 +32,7 @@ def cpu_burn(iterations: int) -> int:
 @app.post("/api/user-message/process")
 def process_endpoint():
     payload = request.get_json(silent=True) or {}
+    logger.info("Request /api/user-message/process payload=%s", payload)
     user_id = payload.get("user_id")
     message = payload.get("message")
 
@@ -61,6 +65,7 @@ def process_endpoint():
 @app.post("/api/cpu-burn")
 def cpu_burn_endpoint():
     payload = request.get_json(silent=True) or {}
+    logger.info("Request /api/cpu-burn payload=%s", payload)
     iterations = payload.get("iterations", 5000)
 
     if not isinstance(iterations, int) or iterations <= 0:
