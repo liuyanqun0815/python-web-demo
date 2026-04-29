@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 
 from fastapi import Depends, FastAPI
 from fastapi.exceptions import RequestValidationError
@@ -7,12 +8,30 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_session
-from schemas import ApiResponse, ProcessRequest
+from schemas import ApiResponse, CpuBurnRequest, CpuBurnResponse, ProcessRequest
 from service import ServiceValidationError, UserNotFoundError, process_user_message
 
 app = FastAPI()
 debug_api_errors = os.getenv("DEBUG_API_ERRORS", "false").lower() == "true"
 logger = logging.getLogger(__name__)
+
+
+def cpu_burn(iterations: int) -> int:
+    """
+    执行纯 CPU 计算：累计质数判定结果，避免被轻易优化。
+    """
+    checksum = 0
+    for number in range(2, iterations + 2):
+        is_prime = True
+        divisor = 2
+        while divisor * divisor <= number:
+            if number % divisor == 0:
+                is_prime = False
+                break
+            divisor += 1
+        if is_prime:
+            checksum += number
+    return checksum
 
 
 @app.exception_handler(RequestValidationError)
@@ -55,6 +74,23 @@ async def process_endpoint(payload: ProcessRequest, session: AsyncSession = Depe
         if debug_api_errors:
             error_message = f"internal server error: {exc.__class__.__name__}: {exc}"
         return JSONResponse(status_code=500, content={"code": 1003, "message": error_message, "data": None})
+
+
+@app.post("/api/cpu-burn", response_model=CpuBurnResponse)
+async def cpu_burn_endpoint(payload: CpuBurnRequest):
+    start = time.perf_counter()
+    checksum = cpu_burn(payload.iterations)
+    elapsed_ms = int((time.perf_counter() - start) * 1000)
+
+    return {
+        "code": 0,
+        "message": "ok",
+        "data": {
+            "iterations": payload.iterations,
+            "checksum": checksum,
+            "elapsed_ms": elapsed_ms,
+        },
+    }
 
 
 if __name__ == "__main__":

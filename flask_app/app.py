@@ -1,9 +1,29 @@
+import time
+
 from flask import Flask, jsonify, request
 
 from config import Settings
 from service import ServiceValidationError, UserNotFoundError, process_user_message
 
 app = Flask(__name__)
+
+
+def cpu_burn(iterations: int) -> int:
+    """
+    执行纯 CPU 计算：累计质数判定结果，避免被轻易优化。
+    """
+    checksum = 0
+    for number in range(2, iterations + 2):
+        is_prime = True
+        divisor = 2
+        while divisor * divisor <= number:
+            if number % divisor == 0:
+                is_prime = False
+                break
+            divisor += 1
+        if is_prime:
+            checksum += number
+    return checksum
 
 
 @app.post("/api/user-message/process")
@@ -36,6 +56,34 @@ def process_endpoint():
         return jsonify({"code": 1002, "message": "database error", "data": None}), 500
     except Exception:
         return jsonify({"code": 1003, "message": "internal server error", "data": None}), 500
+
+
+@app.post("/api/cpu-burn")
+def cpu_burn_endpoint():
+    payload = request.get_json(silent=True) or {}
+    iterations = payload.get("iterations", 5000)
+
+    if not isinstance(iterations, int) or iterations <= 0:
+        return jsonify({"code": 1000, "message": "iterations must be a positive integer", "data": None}), 400
+
+    start = time.perf_counter()
+    checksum = cpu_burn(iterations)
+    elapsed_ms = int((time.perf_counter() - start) * 1000)
+
+    return (
+        jsonify(
+            {
+                "code": 0,
+                "message": "ok",
+                "data": {
+                    "iterations": iterations,
+                    "checksum": checksum,
+                    "elapsed_ms": elapsed_ms,
+                },
+            }
+        ),
+        200,
+    )
 
 
 if __name__ == "__main__":

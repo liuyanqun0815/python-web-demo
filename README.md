@@ -48,6 +48,32 @@
 }
 ```
 
+CPU 压测接口（两项目一致）：
+
+`POST /api/cpu-burn`
+
+请求体：
+
+```json
+{
+  "iterations": 5000
+}
+```
+
+成功响应示例：
+
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "iterations": 5000,
+    "checksum": 1548136,
+    "elapsed_ms": 12
+  }
+}
+```
+
 ## 数据库准备
 
 1. 创建 PostgreSQL 数据库（示例使用 `postgres` 库）

@@ -16,3 +16,19 @@ class ApiResponse(BaseModel):
     code: int
     message: str
     data: ProcessData | None
+
+
+class CpuBurnRequest(BaseModel):
+    iterations: int = Field(default=5000, gt=0, le=200000)
+
+
+class CpuBurnData(BaseModel):
+    iterations: int
+    checksum: int
+    elapsed_ms: int
+
+
+class CpuBurnResponse(BaseModel):
+    code: int
+    message: str
+    data: CpuBurnData | None
