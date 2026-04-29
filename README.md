@@ -138,6 +138,38 @@ cat flask_app/logs/flask-gunicorn.pid
 cat fastapi_app/logs/fastapi-gunicorn.pid
 ```
 
+## 使用脚本管理服务（推荐）
+
+为两个项目分别提供了脚本：
+
+- `flask_app/service_ctl.sh`
+- `fastapi_app/service_ctl.sh`
+
+首次使用需要授权执行：
+
+```bash
+chmod +x flask_app/service_ctl.sh
+chmod +x fastapi_app/service_ctl.sh
+```
+
+Flask 服务管理：
+
+```bash
+cd flask_app
+./service_ctl.sh start
+./service_ctl.sh restart
+./service_ctl.sh stop
+```
+
+FastAPI 服务管理：
+
+```bash
+cd fastapi_app
+./service_ctl.sh start
+./service_ctl.sh restart
+./service_ctl.sh stop
+```
+
 ## 在 Windows 运行（参考）
 
 ```bash
