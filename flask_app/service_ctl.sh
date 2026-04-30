@@ -10,7 +10,7 @@ GUNICORN_BIN="${APP_DIR}/.venv/bin/gunicorn"
 
 WORKERS="${FLASK_WORKERS:-4}"
 BIND_HOST="${FLASK_HOST:-0.0.0.0}"
-BIND_PORT="${FLASK_PORT:-5000}"
+BIND_PORT="${FLASK_PORT:-5001}"
 
 start_service() {
     mkdir -p "${LOG_DIR}"
