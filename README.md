@@ -151,7 +151,7 @@ cat fastapi_app/logs/fastapi-gunicorn.pid
 chmod +x flask_app/service_ctl.sh
 chmod +x fastapi_app/service_ctl.sh
 ```
-
+chmod +x service_ctl.sh
 Flask 服务管理：
 
 ```bash
@@ -170,11 +170,59 @@ cd fastapi_app
 ./service_ctl.sh stop
 ```
 
+## Docker 启动（Python 3.12）
+
+### Flask（Docker）
+
+构建镜像：
+
+```bash
+docker build -t flask-orm-bench:py312 ./flask_app
+```
+
+后台启动容器：
+
+```bash
+docker run -d \
+  --name flask-orm-bench \
+  -p 5001:5001 \
+  -e DATABASE_URL=postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/postgres \
+  flask-orm-bench:py312
+```
+
+### FastAPI（Docker）
+
+构建镜像：
+
+```bash
+docker build -t fastapi-orm-bench:py312 ./fastapi_app
+```
+
+后台启动容器：
+
+```bash
+docker run -d \
+  --name fastapi-orm-bench \
+  -p 8001:8001 \
+  -e DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/postgres \
+  fastapi-orm-bench:py312
+```
+
+### Docker 常用管理命令
+
+```bash
+docker logs -f flask-orm-bench
+docker logs -f fastapi-orm-bench
+docker restart flask-orm-bench fastapi-orm-bench
+docker stop flask-orm-bench fastapi-orm-bench
+docker rm flask-orm-bench fastapi-orm-bench
+```
+
 ## 在 Windows 运行（参考）
 
 ```bash
 cd flask_app
-python -m venv .venv
+py -3.13 -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 set DATABASE_URL=postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/postgres
@@ -183,7 +231,7 @@ gunicorn -w 4 -k sync -b 0.0.0.0:5000 app:app
 
 ```bash
 cd fastapi_app
-python -m venv .venv
+py -3.13 -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 set DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/postgres
