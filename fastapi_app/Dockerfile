@@ -9,15 +9,4 @@ COPY . /app
 
 EXPOSE 8001
 
-CMD [
-  "gunicorn",
-  "-w",
-  "4",
-  "--threads",
-  "4",
-  "-k",
-  "uvicorn.workers.UvicornWorker",
-  "-b",
-  "0.0.0.0:8001",
-  "main:app"
-]
+CMD ["gunicorn", "-w", "4", "--threads", "4", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8001", "main:app"]
