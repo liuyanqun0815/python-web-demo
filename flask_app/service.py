@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date, datetime
+import time
 
 from sqlalchemy import create_engine, select
 from sqlalchemy.exc import SQLAlchemyError
@@ -28,6 +30,7 @@ class ProcessResult:
 
 engine = create_engine(Settings.database_url, pool_pre_ping=True, future=True)
 session_factory = sessionmaker(bind=engine, class_=Session, autoflush=False, autocommit=False, future=True)
+business_thread_pool = ThreadPoolExecutor(max_workers=4)
 
 
 def calculate_age(birth_date: date, today: date) -> int:
@@ -37,11 +40,19 @@ def calculate_age(birth_date: date, today: date) -> int:
     return age
 
 
+def run_threadpool_business_tasks() -> None:
+    futures = [business_thread_pool.submit(time.sleep, 0.01) for _ in range(4)]
+    for future in futures:
+        future.result()
+
+
 def process_user_message(user_id: int, message: str) -> ProcessResult:
     if not isinstance(user_id, int) or user_id <= 0:
         raise ServiceValidationError("user_id must be a positive integer")
     if not isinstance(message, str) or not message.strip():
         raise ServiceValidationError("message must be a non-empty string")
+
+    run_threadpool_business_tasks()
 
     try:
         with session_factory() as session:

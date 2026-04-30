@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date, datetime
 import logging
+import time
 
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
@@ -11,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from models import User, UserMessage
 
 logger = logging.getLogger(__name__)
+business_thread_pool = ThreadPoolExecutor(max_workers=4)
 
 
 class UserNotFoundError(Exception):
@@ -35,11 +39,19 @@ def calculate_age(birth_date: date, today: date) -> int:
     return age
 
 
+async def run_threadpool_business_tasks() -> None:
+    loop = asyncio.get_running_loop()
+    tasks = [loop.run_in_executor(business_thread_pool, time.sleep, 0.01) for _ in range(4)]
+    await asyncio.gather(*tasks)
+
+
 async def process_user_message(session: AsyncSession, user_id: int, message: str) -> ProcessResult:
     if not isinstance(user_id, int) or user_id <= 0:
         raise ServiceValidationError("user_id must be a positive integer")
     if not isinstance(message, str) or not message.strip():
         raise ServiceValidationError("message must be a non-empty string")
+
+    await run_threadpool_business_tasks()
 
     try:
         user = await _get_user(session, user_id)
